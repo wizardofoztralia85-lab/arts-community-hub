@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art's Studio For Wizard's</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1a2e; /* Dark Blue */
+            color: #e0e0ff;
+            background-image: radial-gradient(circle at 15% 50%, rgba(29, 78, 216, 0.15), transparent 30%), /* Blue accent */
+                              radial-gradient(circle at 85% 30%, rgba(22, 163, 74, 0.1), transparent 40%); /* Green accent */
+        }
+        .glass-card {
+            background: rgba(17, 34, 51, 0.6); /* Dark Blue semi-transparent */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 189, 248, 0.2); /* Light Blue border */
+            border-radius: 1rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #047857; /* Dark Green */
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #059669; /* Lighter Green */
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .spinner {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="h-full antialiased">
+    <div id="app" class="p-4 sm:p-6 lg:p-8 min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wider">Art's Studio For Wizard's</h1>
+                <p class="text-sm text-yellow-400 tracking-widest mt-1">A Sam & Shan Productions Inc. Project</p>
+                <p id="userIdDisplay" class="text-xs text-slate-500 mt-2">Connecting...</p>
+                <p id="offlineStatus" class="text-xs text-green-400 mt-1"></p>
+            </div>
+            <div class="glass-card p-3 text-center mt-4 sm:mt-0">
+                <div class="flex items-center space-x-3">
+                    <span class="font-semibold text-lg">My GWA Balance:</span>
+                    <span id="gwa-balance" class="text-xl font-bold text-yellow-400">...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Core Actions -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <!-- Creator's Hub Card -->
+                <div class="glass-card p-6 flex-grow flex flex-col">
+                    <h2 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Creator's Hub</h2>
+                    <p class="text-slate-400 mb-6">Submit your work or get inspired.</p>
+                    <div class="space-y-4 mt-auto">
+                        <button onclick="showModal('commercialArtModal')" class="w-full text-white font-bold py-3 px-4 rounded-lg btn-primary">Submit Commercial Art</button>
+                        <button onclick="showModal('communityContributionModal')" class="w-full text-white font-bold py-3 px-4 rounded-lg bg-sky-600 hover:bg-sky-700 transition">Log Community Contribution</button>
+                        <button onclick="showModal('ideaGeneratorModal')" class="w-full text-white font-bold py-3 px-4 rounded-lg bg-yellow-600 hover:bg-yellow-700 transition">✨ Brainstorm Ideas</button>
+                    </div>
+                </div>
+                <!-- Redemption Center Card -->
+                 <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Redemption Center</h2>
+                    <p class="text-slate-400 mb-4">Redeem your GWA for XRP.</p>
+                     <div class="flex items-center space-x-2 mb-4">
+                        <input type="number" id="redeemAmount" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white placeholder-slate-400" placeholder="Amount of GWA">
+                     </div>
+                    <button onclick="redeemGWA()" class="w-full text-white font-bold py-3 px-4 rounded-lg btn-primary">Redeem Now</button>
+                </div>
+            </div>
+
+            <!-- Middle Column: Workshop Log -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <div class="glass-card p-6 flex-grow flex flex-col">
+                    <h2 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Workshop Log</h2>
+                    <p class="text-slate-400 mb-4 text-sm">A real-time feed of your recent submissions.</p>
+                    <div id="submissionLog" class="space-y-3 overflow-y-auto pr-2 flex-grow">
+                        <!-- Log items will be dynamically inserted here -->
+                        <p class="text-slate-500">No submissions yet...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Tools, Updates & Resources -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <div class="glass-card p-6 flex-grow flex flex-col h-[calc(100vh-10rem)] overflow-y-auto">
+                    <!-- Tools Section -->
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Tech Hub & Tools</h2>
+                        <div class="space-y-4">
+                            <div class="bg-slate-800/50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-lg text-yellow-300">AI Photo & Video Suite</h3>
+                                <p class="text-sm text-slate-400">Create and edit stunning visuals with AI-powered tools.</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-lg text-sky-300">AI Music Tools</h3>
+                                <p class="text-sm text-slate-400">Create, publish, and monetize your AI-assisted tracks.</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-lg text-cyan-300">Voice Cloning Studio</h3>
+                                <p class="text-sm text-slate-400">Create a digital clone of your voice for podcasts and voiceovers.</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-lg text-green-300">Webspace & Podcast</h3>
+                                <p class="text-sm text-slate-400">Publish articles and episodes for the community.</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-lg text-purple-300">Social Impact Apps</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Directives Section -->
+                    <div class="mb-6">
+                         <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                            <h2 class="text-xl font-bold">Directives & Updates</h2>
+                            <button id="newDirectiveBtn" onclick="fetchDailyDirective()" class="text-xs text-yellow-400 hover:text-yellow-300 transition">✨ New Directive</button>
+                        </div>
+                        <div id="directivesContent" class="space-y-3">
+                             <!-- Dynamic Directive will load here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Resources Section -->
+                    <div>
+                        <h2 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Community Resources</h2>
+                        <ul class="space-y-3">
+                            <li><a href="https://www.lifeline.org.au" target="_blank" class="text-red-400 hover:underline">Lifeline</a></li>
+                            <li><a href="https://www.beyondblue.org.au" target="_blank" class="text-sky-400 hover:underline">Beyond Blue</a></li>
+                            <li><a href="https://www.crisistextline.org/" target="_blank" class="text-yellow-400 hover:underline">Crisis Text Line (International)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="ideaGeneratorModal" class="fixed inset-0 z-50 items-center justify-center p-4 hidden modal-backdrop">
+        <div class="glass-card w-full max-w-lg p-6 rounded-lg">
+            <h3 class="text-lg font-bold mb-4">✨ Wizard's Muse</h3>
+            <p class="text-slate-400 mb-4 text-sm">Stuck for an idea? Let the wizard suggest a path.</p>
+            <form id="ideaGeneratorForm">
+                <div class="mb-4">
+                    <label for="ideaArtType" class="block text-sm font-medium text-slate-300 mb-1">Type of Art</label>
+                    <select id="ideaArtType" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white">
+                        <option>Photograph</option>
+                        <option>Video Project</option>
+                        <option>AI Music Track</option>
+                        <option>Webspace Article</option>
+                        <option>Podcast Episode</option>
+                        <option>Digital Illustration</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="ideaTheme" class="block text-sm font-medium text-slate-300 mb-1">Theme or Keyword (Optional)</label>
+                    <input type="text" id="ideaTheme" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white" placeholder="e.g., Cyberpunk, Nature, Hope">
+                </div>
+                <div id="ideaResults" class="my-4 p-4 bg-slate-800/50 rounded-lg min-h-[100px] text-sm whitespace-pre-wrap"></div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeModal('ideaGeneratorModal')" class="px-4 py-2 rounded-lg bg-slate-600 hover:bg-slate-700">Close</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg btn-primary flex items-center">
+                        <span id="ideaGenBtnText">Generate Ideas</span>
+                        <div id="ideaGenSpinner" class="spinner w-4 h-4 rounded-full border-2 border-t-transparent ml-2 hidden"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="commercialArtModal" class="fixed inset-0 z-50 items-center justify-center p-4 hidden modal-backdrop">
+        <div class="glass-card w-full max-w-md p-6 rounded-lg">
+            <h3 class="text-lg font-bold mb-4">Submit Commercial Art</h3>
+            <form id="commercialArtForm">
+                <div class="mb-4">
+                    <label for="artTitle" class="block text-sm font-medium text-slate-300 mb-1">Art Title</label>
+                    <input type="text" id="artTitle" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white" placeholder="e.g., My New Song" required>
+                </div>
+                <div class="mb-4">
+                    <label for="artType" class="block text-sm font-medium text-slate-300 mb-1">Type of Art</label>
+                    <select id="artType" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white">
+                        <option>Photograph</option>
+                        <option>Video Project</option>
+                        <option>AI Music Track</option>
+                        <option>Webspace Article</option>
+                        <option>Podcast Episode</option>
+                        <option>Voice Clone Sample</option>
+                        <option>Digital Illustration</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeModal('commercialArtModal')" class="px-4 py-2 rounded-lg bg-slate-600 hover:bg-slate-700">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg btn-primary">Submit for Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+     <div id="communityContributionModal" class="fixed inset-0 z-50 items-center justify-center p-4 hidden modal-backdrop">
+        <div class="glass-card w-full max-w-md p-6 rounded-lg">
+            <h3 class="text-lg font-bold mb-4">Log Community Contribution</h3>
+            <form id="communityContributionForm">
+                <div class="mb-4">
+                    <label for="contributionTask" class="block text-sm font-medium text-slate-300 mb-1">Task Completed</label>
+                    <input type="text" id="contributionTask" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white" placeholder="e.g., Edited promo video for Wheelie Fun Hub" required>
+                </div>
+                <div class="mb-4">
+                    <label for="contributionProject" class="block text-sm font-medium text-slate-300 mb-1">Project</label>
+                    <select id="contributionProject" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2 text-white">
+                        <option>Addiction Support App</option>
+                        <option>Mental Health App</option>
+                        <option>Wheelie Fun Hub</option>
+                        <option>General Video Editing</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeModal('communityContributionModal')" class="px-4 py-2 rounded-lg bg-slate-600 hover:bg-slate-700">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg btn-primary">Log Contribution</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="successModal" class="fixed inset-0 z-50 items-center justify-center p-4 hidden modal-backdrop">
+        <div class="glass-card w-full max-w-sm p-6 rounded-lg text-center">
+             <h3 class="text-lg font-bold mb-2">Success!</h3>
+             <p id="successMessage" class="text-slate-300 mb-6"></p>
+             <button onclick="closeModal('successModal')" class="px-6 py-2 rounded-lg btn-primary">Close</button>
+        </div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, serverTimestamp, runTransaction, onSnapshot, setLogLevel, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        setLogLevel('debug');
+
+        // --- GEMINI API ---
+        const apiKey = ""; // Provided by the environment
+        const model = 'gemini-2.5-flash-preview-05-20';
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        async function callGemini(prompt, retries = 3, delay = 1000) {
+            try {
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                     if (response.status === 429 && retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return callGemini(prompt, retries - 1, delay * 2); // Exponential backoff
+                    }
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || "No response from the wizard.";
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                if (retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return callGemini(prompt, retries - 1, delay * 2);
+                }
+                return "The wizard is currently resting. Please try again later.";
+            }
+        }
+        
+        // --- OFFLINE PERSISTENCE ---
+        try {
+            await enableIndexedDbPersistence(db);
+            console.log("Offline persistence enabled.");
+            document.getElementById('offlineStatus').textContent = 'Offline Mode Ready';
+        } catch (err) {
+            console.warn("Firestore persistence failed:", err.message);
+        }
+
+        let currentUserId = null;
+        let userDocRef = null;
+
+        // --- AUTHENTICATION & DATA LISTENERS ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                document.getElementById('userIdDisplay').textContent = `User ID: ${currentUserId}`;
+                
+                const profileCollectionPath = `artifacts/${appId}/users/${currentUserId}/profileData`;
+                userDocRef = doc(db, profileCollectionPath, "main");
+
+                const userDoc = await getDoc(userDocRef);
+                if (!userDoc.exists()) {
+                    await setDoc(userDocRef, { gwaBalance: 1250, createdAt: serverTimestamp() });
+                }
+                
+                onSnapshot(userDocRef, (doc) => {
+                    document.getElementById('gwa-balance').textContent = doc.exists() ? (doc.data().gwaBalance || 0) : 0;
+                });
+
+                const submissionsCollectionPath = `artifacts/${appId}/users/${currentUserId}/submissions`;
+                const submissionsQuery = collection(db, submissionsCollectionPath);
+                
+                onSnapshot(submissionsQuery, (snapshot) => {
+                    const logContainer = document.getElementById('submissionLog');
+                    logContainer.innerHTML = ''; 
+
+                    if (snapshot.empty) {
+                        logContainer.innerHTML = '<p class="text-slate-500">No submissions yet...</p>';
+                        return;
+                    }
+                    
+                    const submissions = snapshot.docs.map(doc => doc.data());
+                    submissions.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                    submissions.forEach(submission => {
+                        const statusColor = submission.status === 'pending_review' ? 'text-yellow-400' : 'text-green-400';
+                        const title = submission.type === 'commercial' ? submission.title : submission.task;
+
+                        const logEntry = document.createElement('div');
+                        logEntry.className = 'bg-slate-800/50 p-3 rounded-lg';
+                        logEntry.innerHTML = `
+                            <p class="font-semibold text-sm truncate">${title}</p>
+                            <div class="flex justify-between items-center mt-1">
+                                <p class="text-xs text-slate-400">${submission.artType || submission.project}</p>
+                                <p class="text-xs font-medium ${statusColor}">${submission.status.replace('_', ' ')}</p>
+                            </div>
+                        `;
+                        logContainer.appendChild(logEntry);
+                    });
+                });
+
+                fetchDailyDirective(); // Fetch initial directive on login
+            } else {
+                signInAnonymously(auth).catch((error) => console.error("Anonymous sign-in failed:", error));
+            }
+        });
+        
+        // --- GEMINI-POWERED FEATURES ---
+        window.fetchDailyDirective = async function() {
+            const contentDiv = document.getElementById('directivesContent');
+            const button = document.getElementById('newDirectiveBtn');
+            button.disabled = true;
+            contentDiv.innerHTML = '<p class="text-slate-400 text-sm">The wizard is conjuring a new directive...</p>';
+
+            const prompt = "Generate a single, short, inspiring creative directive (2-3 sentences max) for a community of digital artists and creators. Be mystical and encouraging, like a wise wizard guiding their apprentices. Frame it as a 'Directive'.";
+            const directiveText = await callGemini(prompt);
+
+            contentDiv.innerHTML = `
+                <div class="bg-slate-800/50 p-3 rounded-lg">
+                    <p class="font-semibold text-sm">Today's Directive <span class="text-xs text-slate-500 float-right">Just Now</span></p>
+                    <p class="text-xs text-slate-300 mt-1">${directiveText}</p>
+                </div>`;
+            button.disabled = false;
+        }
+
+        document.getElementById('ideaGeneratorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const artType = document.getElementById('ideaArtType').value;
+            const theme = document.getElementById('ideaTheme').value;
+            const resultsDiv = document.getElementById('ideaResults');
+            const spinner = document.getElementById('ideaGenSpinner');
+            const btnText = document.getElementById('ideaGenBtnText');
+            
+            spinner.classList.remove('hidden');
+            btnText.textContent = "Generating...";
+            resultsDiv.textContent = 'Thinking...';
+
+            let themeClause = theme ? ` based on the theme: "${theme}"` : "";
+            const prompt = `You are a creative wizard. Generate 5 distinct and actionable project ideas for a digital artist creating a "${artType}"${themeClause}. Format them as a numbered list.`;
+            
+            const ideas = await callGemini(prompt);
+            resultsDiv.textContent = ideas;
+            spinner.classList.add('hidden');
+            btnText.textContent = "Generate Ideas";
+        });
+
+
+        // --- GLOBAL UI FUNCTIONS ---
+        window.showModal = function(modalId) {
+            document.getElementById(modalId).classList.add('flex');
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('flex');
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showSuccessMessage(message) {
+             document.getElementById('successMessage').textContent = message;
+             showModal('successModal');
+        }
+
+        // --- FIRESTORE ACTIONS ---
+        document.getElementById('commercialArtForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return;
+            const title = document.getElementById('artTitle').value;
+            const type = document.getElementById('artType').value;
+
+            try {
+                const submissionsCollectionPath = `artifacts/${appId}/users/${currentUserId}/submissions`;
+                await addDoc(collection(db, submissionsCollectionPath), {
+                    userId: currentUserId, type: 'commercial', title, artType: type, status: 'pending_review', createdAt: serverTimestamp()
+                });
+                closeModal('commercialArtModal');
+                showSuccessMessage('Your Art has been submitted for review.');
+                e.target.reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+            }
+        });
+
+        document.getElementById('communityContributionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return;
+            const task = document.getElementById('contributionTask').value;
+            const project = document.getElementById('contributionProject').value;
+            try {
+                const submissionsCollectionPath = `artifacts/${appId}/users/${currentUserId}/submissions`;
+                await addDoc(collection(db, submissionsCollectionPath), {
+                    userId: currentUserId, type: 'community', task, project, status: 'pending_review', createdAt: serverTimestamp()
+                });
+                closeModal('communityContributionModal');
+                showSuccessMessage('Your contribution has been logged.');
+                e.target.reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+            }
+        });
+
+        window.redeemGWA = async function() {
+            const amountInput = document.getElementById('redeemAmount');
+            const amount = parseInt(amountInput.value, 10);
+
+            if (!currentUserId || isNaN(amount) || amount <= 0) return;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    if (!userDoc.exists()) throw "User document does not exist!";
+                    const currentBalance = userDoc.data().gwaBalance || 0;
+                    if (amount > currentBalance) throw "Insufficient GWA balance.";
+                    
+                    transaction.update(userDocRef, { gwaBalance: currentBalance - amount });
+                });
+                amountInput.value = '';
+                showSuccessMessage(`${amount} GWA successfully redeemed!`);
+            } catch (e) {
+                console.error("Redemption failed: ", e);
+                showSuccessMessage(typeof e === 'string' ? e : 'Redemption failed.');
+            }
+        }
+    </script>
+</body>
+</html>
+
