@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art's Studio For Wizard's</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c8952a;
+            --gold-light: #e8b84b;
+            --gold-pale: #f5d98a;
+            --crimson: #8b1a1a;
+            --crimson-light: #b22222;
+            --ink: #0a0608;
+            --ink-mid: #120c10;
+            --ink-panel: #1a1020;
+            --ink-card: #221530;
+            --purple-deep: #2d1b4e;
+            --purple-mid: #4a2d7a;
+            --teal-arcane: #1a5f6a;
+            --teal-glow: #2a9fae;
+            --text-main: #e8dfc8;
+            --text-dim: #a09070;
+            --text-faint: #605040;
+            --border-gold: rgba(200,149,42,0.35);
+            --border-glow: rgba(200,149,42,0.7);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'EB Garamond', Georgia, serif;
+            background-color: var(--ink);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background ritual circle / atmosphere */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(74,45,122,0.4) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 10% 100%, rgba(139,26,26,0.25) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 90% 80%, rgba(26,95,106,0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Noise grain overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-gold);
+            position: relative;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        header::after {
+            content: '✦ ✦ ✦';
+            position: absolute;
+            bottom: -0.8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            padding: 0 1rem;
+            color: var(--gold);
+            font-size: 0.75rem;
+            letter-spacing: 0.5em;
+        }
+
+        .site-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(1.4rem, 3vw, 2.2rem);
+            font-weight: 700;
+            color: var(--gold-light);
+            letter-spacing: 0.05em;
+            line-height: 1.2;
+            text-shadow: 0 0 40px rgba(232,184,75,0.4), 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .site-subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            color: var(--gold);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-top: 0.4rem;
+            opacity: 0.8;
+        }
+
+        .user-status {
+            font-size: 0.7rem;
+            color: var(--text-faint);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--ink-card) 0%, var(--purple-deep) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-width: 220px;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(200,149,42,0.08) 0%, transparent 60%);
+        }
+
+        .balance-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-amount {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            text-shadow: 0 0 20px rgba(232,184,75,0.5);
+            line-height: 1;
+        }
+
+        .balance-unit {
+            font-size: 0.75rem;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            margin-top: 0.25rem;
+            font-family: 'Cinzel', serif;
+        }
+
+        .offline-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.6rem;
+            color: var(--teal-glow);
+            letter-spacing: 0.15em;
+            font-family: 'Cinzel', serif;
+        }
+
+        /* ===== MAIN GRID ===== */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) { main { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
+
+        /* ===== ARCANE CARDS ===== */
+        .arcane-card {
+            background: linear-gradient(160deg, var(--ink-card) 0%, var(--ink-panel) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.5rem;
+            padding: 1.75rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .arcane-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0.6;
+        }
+
+        /* Corner ornaments */
+        .arcane-card::after {
+            content: '◆';
+            position: absolute;
+            top: 0.6rem; right: 0.8rem;
+            color: var(--gold);
+            font-size: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title-icon {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 0.35rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0);
+            transition: background 0.2s;
+        }
+
+        .btn:hover::after { background: rgba(255,255,255,0.06); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #7a5a1a 0%, #c8952a 50%, #9a6e1a 100%);
+            color: #fff8e8;
+            border: 1px solid rgba(232,184,75,0.5);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 12px rgba(200,149,42,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        .btn-gold:hover {
+            box-shadow: 0 4px 20px rgba(200,149,42,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-arcane {
+            background: linear-gradient(135deg, var(--purple-deep) 0%, var(--purple-mid) 100%);
+            color: #d8c8f0;
+            border: 1px solid rgba(138,90,210,0.4);
+            box-shadow: 0 2px 10px rgba(74,45,122,0.4);
+        }
+
+        .btn-arcane:hover {
+            box-shadow: 0 4px 18px rgba(74,45,122,0.6);
+            transform: translateY(-1px);
+        }
+
+        .btn-teal {
+            background: linear-gradient(135deg, var(--teal-arcane) 0%, #1e7a8a 100%);
+            color: #c0f0f8;
+            border: 1px solid rgba(42,159,174,0.4);
+            box-shadow: 0 2px 10px rgba(26,95,106,0.4);
+        }
+
+        .btn-teal:hover {
+            box-shadow: 0 4px 18px rgba(26,95,106,0.6);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border-gold);
+        }
+
+        .btn-ghost:hover {
+            color: var(--gold-light);
+            border-color: var(--gold);
+        }
+
+        /* Button group spacing */
+        .btn-stack { display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto; }
+
+        /* ===== REDEMPTION ===== */
+        .redeem-input {
+            width: 100%;
+            background: rgba(10,6,8,0.8);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.35rem;
+            padding: 0.6rem 0.9rem;
+            color: var(--text-main);
+            font-family: 'EB Garamond', serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .redeem-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(200,149,42,0.2);
+        }
+
+        .redeem-input::placeholder { color: var(--text-faint); font-style: italic; }
+
+        /* ===== WORKSHOP LOG ===== */
+        #submissionLog {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 340px;
+            padding-right: 0.25rem;
+        }
+
+        #submissionLog::-webkit-scrollbar { width: 4px; }
+        #submissionLog::-webkit-scrollbar-track { background: transparent; }
+        #submissionLog::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 2px; }
+
+        .log-entry {
+            background: rgba(10,6,8,0.6);
+            border: 1px solid rgba(200,149,42,0.15);
+            border-radius: 0.35rem;
+            padding: 0.75rem 1rem;
+            animation: fadeSlideIn 0.3s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-entry-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            color: var(--text-main);
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .log-entry-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.35rem;
+            font-size: 0.7rem;
+        }
+
+        .log-type { color: var(--text-faint); font-style: italic; }
+        .log-status-pending { color: #d4a017; }
+        .log-status-approved { color: var(--teal-glow); }
+
+        .log-empty { color: var(--text-faint); font-style: italic; font-size: 0.85rem; text-align: center; padding: 2rem 0; }
+
+        /* ===== TOOLS PANEL ===== */
+        .tools-scroll {
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .tool-item {
+            background: rgba(10,6,8,0.5);
+            border: 1px solid rgba(200,149,42,0.12);
+            border-left: 2px solid;
+            border-radius: 0.35rem;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.6rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .tool-item:hover {
+            background: rgba(200,149,42,0.05);
+            border-color: rgba(200,149,42,0.25);
+        }
+
+        .tool-item.gold { border-left-color: var(--gold); }
+        .tool-item.purple { border-left-color: #9b59b6; }
+        .tool-item.teal { border-left-color: var(--teal-glow); }
+        .tool-item.green { border-left-color: #27ae60; }
+        .tool-item.red { border-left-color: var(--crimson-light); }
+
+        .tool-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        .tool-name.gold { color: var(--gold-light); }
+        .tool-name.purple { color: #c39bd3; }
+        .tool-name.teal { color: var(--teal-glow); }
+        .tool-name.green { color: #82e0aa; }
+        .tool-name.red { color: #f1948a; }
+
+        .tool-desc { font-size: 0.78rem; color: var(--text-dim); font-style: italic; line-height: 1.4; }
+
+        /* ===== DIRECTIVES ===== */
+        .directive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-directive {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            background: none;
+            border: 1px solid var(--border-gold);
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-directive:hover { color: var(--gold-light); border-color: var(--gold); }
+        .btn-directive:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .directive-box {
+            background: rgba(10,6,8,0.6);
+            border: 1px solid rgba(200,149,42,0.2);
+            border-radius: 0.35rem;
+            padding: 1rem 1.1rem;
+        }
+
+        .directive-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .directive-text { font-size: 0.88rem; color: var(--text-main); line-height: 1.6; font-style: italic; }
+
+        /* ===== RESOURCES ===== */
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(200,149,42,0.1);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .resource-link::before { content: '◈'; font-size: 0.6rem; }
+        .resource-link:last-child { border-bottom: none; }
+
+        .resource-link.crimson { color: #e57373; }
+        .resource-link.sky { color: #7ec8e3; }
+        .resource-link.amber { color: var(--gold-light); }
+
+        .resource-link:hover { opacity: 0.8; }
+
+        /* ===== DIVIDER SECTION ===== */
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border-gold);
+            margin: 1.25rem 0;
+            position: relative;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(5,2,8,0.85);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-backdrop.open { display: flex; }
+
+        .modal-panel {
+            background: linear-gradient(160deg, var(--ink-card) 0%, var(--purple-deep) 100%);
+            border: 1px solid var(--border-glow);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            box-shadow: 0 0 60px rgba(200,149,42,0.15), 0 20px 60px rgba(0,0,0,0.8);
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+        }
+
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-desc { font-size: 0.85rem; color: var(--text-dim); font-style: italic; margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-field {
+            width: 100%;
+            background: rgba(10,6,8,0.8);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.35rem;
+            padding: 0.6rem 0.9rem;
+            color: var(--text-main);
+            font-family: 'EB Garamond', serif;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-field:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(200,149,42,0.15);
+        }
+
+        .form-field option { background: var(--ink-panel); }
+        textarea.form-field { font-family: 'EB Garamond', serif; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        /* Idea results */
+        #ideaResults {
+            background: rgba(10,6,8,0.6);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.35rem;
+            padding: 1rem;
+            min-height: 100px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            margin: 0.75rem 0;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(200,149,42,0.3);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        .spinner.active { display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Decorative rune line */
+        .rune-line {
+            text-align: center;
+            font-size: 0.55rem;
+            letter-spacing: 0.6em;
+            color: var(--text-faint);
+            margin: 0.5rem 0;
+        }
+
+        /* ===== NOTICE BOARD ===== */
+        .notice-board-section {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-gold);
+            position: relative;
+        }
+
+        .notice-board-section::before {
+            content: '✦  COMMUNITY NOTICE BOARD  ✦';
+            position: absolute;
+            top: -0.8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            padding: 0 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.35em;
+            color: var(--gold);
+            white-space: nowrap;
+        }
+
+        .notice-board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .notice-board-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: var(--gold-light);
+            text-shadow: 0 0 20px rgba(232,184,75,0.3);
+        }
+
+        .notice-board-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-dim);
+            font-style: italic;
+            margin-top: 0.3rem;
+        }
+
+        .notice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .notice-post {
+            background: linear-gradient(160deg, rgba(34,21,48,0.95) 0%, rgba(18,12,24,0.95) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.5rem;
+            padding: 1.25rem 1.4rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        .notice-post:hover {
+            border-color: rgba(200,149,42,0.6);
+            box-shadow: 0 4px 24px rgba(200,149,42,0.1);
+        }
+
+        .notice-post::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0.5;
+        }
+
+        /* Urgency indicator strip on left */
+        .notice-post.urgency-high { border-left: 3px solid #e74c3c; }
+        .notice-post.urgency-medium { border-left: 3px solid var(--gold); }
+        .notice-post.urgency-low { border-left: 3px solid var(--teal-glow); }
+
+        .notice-post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .notice-town {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            color: var(--gold-light);
+        }
+
+        .notice-urgency-badge {
+            font-family: 'Cinzel', serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.12em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.2rem;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .badge-high { background: rgba(231,76,60,0.2); color: #f1948a; border: 1px solid rgba(231,76,60,0.4); }
+        .badge-medium { background: rgba(200,149,42,0.15); color: var(--gold-light); border: 1px solid var(--border-gold); }
+        .badge-low { background: rgba(42,159,174,0.15); color: var(--teal-glow); border: 1px solid rgba(42,159,174,0.3); }
+
+        .notice-author {
+            font-size: 0.72rem;
+            color: var(--text-faint);
+            font-style: italic;
+            margin-bottom: 0.75rem;
+        }
+
+        .notice-message {
+            font-size: 0.92rem;
+            color: var(--text-main);
+            line-height: 1.65;
+            margin-bottom: 1rem;
+        }
+
+        .notice-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(200,149,42,0.1);
+            padding-top: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .notice-timestamp {
+            font-size: 0.68rem;
+            color: var(--text-faint);
+            font-style: italic;
+        }
+
+        .notice-reply-btn {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.12em;
+            color: var(--teal-glow);
+            background: none;
+            border: 1px solid rgba(42,159,174,0.3);
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .notice-reply-btn:hover {
+            background: rgba(42,159,174,0.1);
+            border-color: var(--teal-glow);
+        }
+
+        /* Replies section */
+        .notice-replies {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed rgba(200,149,42,0.15);
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .notice-replies.open { display: flex; }
+
+        .reply-item {
+            background: rgba(10,6,8,0.5);
+            border-radius: 0.25rem;
+            padding: 0.6rem 0.8rem;
+            border-left: 2px solid var(--teal-arcane);
+        }
+
+        .reply-author {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            color: var(--teal-glow);
+            margin-bottom: 0.25rem;
+        }
+
+        .reply-text { font-size: 0.82rem; color: var(--text-main); line-height: 1.5; }
+
+        .reply-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .reply-input {
+            flex: 1;
+            background: rgba(10,6,8,0.7);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.25rem;
+            padding: 0.4rem 0.7rem;
+            color: var(--text-main);
+            font-family: 'EB Garamond', serif;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .reply-input:focus { border-color: var(--teal-glow); }
+        .reply-input::placeholder { color: var(--text-faint); font-style: italic; }
+
+        .reply-submit {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            color: #c0f0f8;
+            background: var(--teal-arcane);
+            border: 1px solid rgba(42,159,174,0.4);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .reply-submit:hover { background: #1e7a8a; }
+
+        .notice-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-faint);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .notice-empty-icon { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.5; }
+
+        /* Contact card highlight */
+        .gwa-contact-strip {
+            background: linear-gradient(135deg, rgba(45,27,78,0.8) 0%, rgba(26,95,106,0.4) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 0.5rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .gwa-contact-icon { font-size: 2rem; flex-shrink: 0; }
+
+        .gwa-contact-text h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            color: var(--gold-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .gwa-contact-text p { font-size: 0.85rem; color: var(--text-dim); font-style: italic; line-height: 1.5; }
+
+        .gwa-contact-text a { color: var(--teal-glow); text-decoration: none; }
+        .gwa-contact-text a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<!-- ===== SETUP BANNER (hidden once keys are filled in) ===== -->
+<div id="setupBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(90deg,#7a1a1a,#3a1a6a);border-bottom:2px solid var(--gold);padding:0.85rem 1.5rem;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <span style="font-size:1.2rem;">⚙️</span>
+    <div style="flex:1;min-width:200px;">
+        <div style="font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.15em;color:var(--gold-light);margin-bottom:0.2rem;">SETUP REQUIRED</div>
+        <div style="font-size:0.82rem;color:var(--text-main);">Open <code style="background:rgba(0,0,0,0.4);padding:0.1rem 0.4rem;border-radius:0.2rem;color:var(--gold-pale);">index.html</code> in a text editor and fill in your Firebase config and Gemini API key at the top of the &lt;script&gt; block. <a href="https://console.firebase.google.com" target="_blank" style="color:var(--teal-glow);">Firebase Console</a> · <a href="https://aistudio.google.com" target="_blank" style="color:var(--teal-glow);">Gemini API Key</a></div>
+    </div>
+    <button onclick="document.getElementById('setupBanner').style.display='none'" style="background:none;border:1px solid var(--border-gold);color:var(--text-dim);padding:0.3rem 0.7rem;border-radius:0.25rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;">Dismiss</button>
+</div>
+
+<div id="app" style="padding-top:0;">
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div>
+            <h1 class="site-title">Art's Studio For Wizard's</h1>
+            <p class="site-subtitle">A Sam &amp; Shan Productions Inc. Project</p>
+            <p id="userIdDisplay" class="user-status">Consulting the arcane registry...</p>
+            <span id="offlineStatus" class="offline-badge"></span>
+        </div>
+        <div class="balance-card">
+            <div class="balance-label">GWA Treasury</div>
+            <div id="gwa-balance" class="balance-amount">—</div>
+            <div class="balance-unit">GWA Tokens</div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN GRID ===== -->
+    <main>
+
+        <!-- Col 1: Creator's Hub + Redemption -->
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+            <div class="arcane-card" style="flex:1;">
+                <div class="card-title"><span class="card-title-icon">⚗</span> Creator's Hub</div>
+                <p class="card-desc">Submit your work into the grand compendium, or seek the Muse's counsel.</p>
+                <div class="btn-stack">
+                    <button class="btn btn-gold" onclick="showModal('commercialArtModal')">Submit Commercial Art</button>
+                    <button class="btn btn-arcane" onclick="showModal('communityContributionModal')">Log Community Contribution</button>
+                    <button class="btn btn-teal" onclick="showModal('ideaGeneratorModal')">✦ Brainstorm Ideas</button>
+                </div>
+            </div>
+
+            <div class="arcane-card">
+                <div class="card-title"><span class="card-title-icon">⚖</span> Redemption Circle</div>
+                <p class="card-desc">Convert your GWA tokens into XRP through the alchemical exchange.</p>
+                <input type="number" id="redeemAmount" class="redeem-input" placeholder="Enter GWA amount..." />
+                <button class="btn btn-gold" onclick="redeemGWA()">Transmute to XRP</button>
+            </div>
+
+        </div>
+
+        <!-- Col 2: Workshop Log -->
+        <div class="arcane-card">
+            <div class="card-title"><span class="card-title-icon">📜</span> Workshop Log</div>
+            <p class="card-desc">Your recent submissions, inscribed in the ledger.</p>
+            <div id="submissionLog">
+                <p class="log-empty">The ledger awaits its first inscription...</p>
+            </div>
+        </div>
+
+        <!-- Col 3: Tools + Directives + Resources -->
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+            <div class="arcane-card">
+                <div class="card-title"><span class="card-title-icon">🔮</span> Tech Hub &amp; Tools</div>
+                <div class="tools-scroll">
+                    <div class="tool-item gold">
+                        <div class="tool-name gold">AI Photo &amp; Video Suite</div>
+                        <div class="tool-desc">Create and edit stunning visuals with AI-powered tools.</div>
+                    </div>
+                    <div class="tool-item purple">
+                        <div class="tool-name purple">AI Music Tools</div>
+                        <div class="tool-desc">Create, publish, and monetize your AI-assisted tracks.</div>
+                    </div>
+                    <div class="tool-item teal">
+                        <div class="tool-name teal">Voice Cloning Studio</div>
+                        <div class="tool-desc">Create a digital clone of your voice for podcasts and voiceovers.</div>
+                    </div>
+                    <div class="tool-item green">
+                        <div class="tool-name green">Webspace &amp; Podcast</div>
+                        <div class="tool-desc">Publish articles and episodes for the community.</div>
+                    </div>
+                    <div class="tool-item red">
+                        <div class="tool-name red">Social Impact Apps</div>
+                        <div class="tool-desc">Tools for community wellbeing and harm reduction programs.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arcane-card">
+                <div class="directive-header">
+                    <div class="card-title" style="border:none;padding:0;margin:0;">✦ Directives &amp; Updates</div>
+                    <button id="newDirectiveBtn" class="btn-directive" onclick="fetchDailyDirective()">✨ New Directive</button>
+                </div>
+                <div id="directivesContent">
+                    <div class="directive-box">
+                        <div class="directive-label">Awaiting Directive</div>
+                        <div class="directive-text">The oracle prepares its counsel...</div>
+                    </div>
+                </div>
+
+                <hr class="section-divider" />
+
+                <div class="card-title" style="border:none;padding-bottom:0.5rem;"><span class="card-title-icon">🕯</span> Community Resources</div>
+                <a href="https://www.lifeline.org.au" target="_blank" class="resource-link crimson">Lifeline Australia</a>
+                <a href="https://www.beyondblue.org.au" target="_blank" class="resource-link sky">Beyond Blue</a>
+                <a href="https://www.crisistextline.org/" target="_blank" class="resource-link amber">Crisis Text Line (International)</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ===== COMMUNITY NOTICE BOARD ===== -->
+    <section class="notice-board-section">
+        <div class="notice-board-header">
+            <div>
+                <div class="notice-board-title">📌 Community Notice Board</div>
+                <div class="notice-board-subtitle">Towns and communities: reach out to invite Glass Wizard Australia to help with harm reduction and wellbeing programs in your area.</div>
+            </div>
+            <button class="btn btn-gold" style="width:auto;padding:0.7rem 1.5rem;white-space:nowrap;" onclick="showModal('noticeBoardModal')">✦ Post an Invitation</button>
+        </div>
+
+        <!-- GWA Contact strip -->
+        <div class="gwa-contact-strip">
+            <div class="gwa-contact-icon">🧙</div>
+            <div class="gwa-contact-text">
+                <h3>Invite Glass Wizard Australia to Your Community</h3>
+                <p>Dealing with a growing drug culture in your town? We offer harm reduction mentorship, creative workshops, and community programs. Post below or reach us directly at <a href="/cdn-cgi/l/email-protection#27504e5d4655434841485d5355464b4e461f1267404a464e4b0944484a"><span class="__cf_email__" data-cfemail="27504e5d4655434841485d5355464b4e461f1267404a464e4b0944484a">[email&#160;protected]</span></a> · <a href="tel:0480424216">0480 424 216</a></p>
+            </div>
+        </div>
+
+        <!-- Posts grid -->
+        <div id="noticeBoardGrid" class="notice-grid">
+            <div class="notice-empty">
+                <div class="notice-empty-icon">📜</div>
+                <p>No community invitations yet. Be the first to reach out.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Idea Generator -->
+<div id="ideaGeneratorModal" class="modal-backdrop">
+    <div class="modal-panel" style="max-width:560px;">
+        <div class="modal-title">✨ Wizard's Muse</div>
+        <p class="modal-desc">Stuck for an idea? Let the wizard suggest a path through the creative ether.</p>
+        <form id="ideaGeneratorForm">
+            <label class="form-label" for="ideaArtType">Type of Art</label>
+            <select id="ideaArtType" class="form-field">
+                <option>Photograph</option>
+                <option>Video Project</option>
+                <option>AI Music Track</option>
+                <option>Webspace Article</option>
+                <option>Podcast Episode</option>
+                <option>Digital Illustration</option>
+            </select>
+            <label class="form-label" for="ideaTheme">Theme or Keyword (Optional)</label>
+            <input type="text" id="ideaTheme" class="form-field" placeholder="e.g., Cyberpunk, Nature, Hope" />
+            <div id="ideaResults"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" style="width:auto;padding:0.6rem 1.2rem;" onclick="closeModal('ideaGeneratorModal')">Dismiss</button>
+                <button type="submit" class="btn btn-gold" style="width:auto;padding:0.6rem 1.4rem;display:flex;align-items:center;gap:0.5rem;">
+                    <span id="ideaGenBtnText">Conjure Ideas</span>
+                    <div id="ideaGenSpinner" class="spinner"></div>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Commercial Art -->
+<div id="commercialArtModal" class="modal-backdrop">
+    <div class="modal-panel">
+        <div class="modal-title">Submit Commercial Art</div>
+        <p class="modal-desc">Inscribe your work into the Grand Compendium for review.</p>
+        <form id="commercialArtForm">
+            <label class="form-label" for="artTitle">Art Title</label>
+            <input type="text" id="artTitle" class="form-field" placeholder="e.g., My New Song" required />
+            <label class="form-label" for="artType">Type of Art</label>
+            <select id="artType" class="form-field">
+                <option>Photograph</option>
+                <option>Video Project</option>
+                <option>AI Music Track</option>
+                <option>Webspace Article</option>
+                <option>Podcast Episode</option>
+                <option>Voice Clone Sample</option>
+                <option>Digital Illustration</option>
+            </select>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" style="width:auto;padding:0.6rem 1.2rem;" onclick="closeModal('commercialArtModal')">Cancel</button>
+                <button type="submit" class="btn btn-gold" style="width:auto;padding:0.6rem 1.4rem;">Submit for Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Community Contribution -->
+<div id="communityContributionModal" class="modal-backdrop">
+    <div class="modal-panel">
+        <div class="modal-title">Log Community Contribution</div>
+        <p class="modal-desc">Record your service to the community in the sacred ledger.</p>
+        <form id="communityContributionForm">
+            <label class="form-label" for="contributionTask">Task Completed</label>
+            <input type="text" id="contributionTask" class="form-field" placeholder="e.g., Edited promo video for Wheelie Fun Hub" required />
+            <label class="form-label" for="contributionProject">Project</label>
+            <select id="contributionProject" class="form-field">
+                <option>Addiction Support App</option>
+                <option>Mental Health App</option>
+                <option>Wheelie Fun Hub</option>
+                <option>General Video Editing</option>
+            </select>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" style="width:auto;padding:0.6rem 1.2rem;" onclick="closeModal('communityContributionModal')">Cancel</button>
+                <button type="submit" class="btn btn-gold" style="width:auto;padding:0.6rem 1.4rem;">Log Contribution</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success -->
+<div id="successModal" class="modal-backdrop">
+    <div class="modal-panel" style="max-width:380px;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">✦</div>
+        <div class="modal-title">So mote it be.</div>
+        <p id="successMessage" class="modal-desc" style="margin-top:0.5rem;"></p>
+        <button class="btn btn-gold" style="margin-top:1rem;" onclick="closeModal('successModal')">Close</button>
+    </div>
+</div>
+
+<!-- Notice Board Post Modal -->
+<div id="noticeBoardModal" class="modal-backdrop">
+    <div class="modal-panel" style="max-width:560px;">
+        <div class="modal-title">📌 Post a Community Invitation</div>
+        <p class="modal-desc">Tell us about your community and how Glass Wizard Australia can help. We read every message and will respond as soon as we can.</p>
+        <form id="noticeBoardForm">
+            <label class="form-label" for="nbTownName">Town / Community Name *</label>
+            <input type="text" id="nbTownName" class="form-field" placeholder="e.g., Port Augusta SA" required />
+
+            <label class="form-label" for="nbYourName">Your Name *</label>
+            <input type="text" id="nbYourName" class="form-field" placeholder="e.g., Jane Smith" required />
+
+            <label class="form-label" for="nbContact">Contact (email or phone) *</label>
+            <input type="text" id="nbContact" class="form-field" placeholder="e.g., jane@email.com or 04xx xxx xxx" required />
+
+            <label class="form-label" for="nbUrgency">How Urgent Is the Need?</label>
+            <select id="nbUrgency" class="form-field">
+                <option value="high">High — Crisis level, need help soon</option>
+                <option value="medium" selected>Medium — Growing problem, planning ahead</option>
+                <option value="low">Low — Early stages, exploring options</option>
+            </select>
+
+            <label class="form-label" for="nbMessage">Your Message *</label>
+            <textarea id="nbMessage" class="form-field" rows="5" style="resize:vertical;min-height:100px;" placeholder="Describe what's happening in your community and what kind of support you're looking for..." required></textarea>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" style="width:auto;padding:0.6rem 1.2rem;" onclick="closeModal('noticeBoardModal')">Cancel</button>
+                <button type="submit" class="btn btn-gold" style="width:auto;padding:0.6rem 1.4rem;">Post Invitation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, serverTimestamp, runTransaction, onSnapshot, setLogLevel, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ============================================================
+    // STEP 1 — PASTE YOUR FIREBASE CONFIG HERE
+    // Get this from: console.firebase.google.com
+    //   → Your Project → Project Settings → Your Apps → Web App
+    // ============================================================
+    const firebaseConfig = {
+        apiKey:            "PASTE_YOUR_FIREBASE_API_KEY_HERE",
+        authDomain:        "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+        projectId:         "PASTE_YOUR_PROJECT_ID",
+        storageBucket:     "PASTE_YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+        appId:             "PASTE_YOUR_FIREBASE_APP_ID"
+    };
+
+    // ============================================================
+    // STEP 2 — SET YOUR APP ID (used as a Firestore namespace)
+    // Can be anything unique, e.g. "gwa-arts-studio"
+    // ============================================================
+    const appId = "gwa-arts-studio";
+
+    // ============================================================
+    // STEP 3 — PASTE YOUR GEMINI API KEY HERE
+    // Get this from: aistudio.google.com → Get API Key
+    // ============================================================
+    const geminiApiKey = "PASTE_YOUR_GEMINI_API_KEY_HERE";
+
+    // --- Internal setup (don't edit below this line) ---
+    const SETUP_COMPLETE = !firebaseConfig.apiKey.includes("PASTE_") && !geminiApiKey.includes("PASTE_");
+    if (!SETUP_COMPLETE) {
+        document.getElementById('setupBanner').style.display = 'flex';
+    }
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const model = 'gemini-2.5-flash-preview-05-20';
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+
+    async function callGemini(prompt, retries = 3, delay = 1000) {
+        try {
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                if (response.status === 429 && retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return callGemini(prompt, retries - 1, delay * 2);
+                }
+                throw new Error(`API call failed: ${response.status}`);
+            }
+            const result = await response.json();
+            return result.candidates?.[0]?.content?.parts?.[0]?.text || "No response from the wizard.";
+        } catch (error) {
+            console.error("Gemini API call failed:", error);
+            if (retries > 0) {
+                await new Promise(res => setTimeout(res, delay));
+                return callGemini(prompt, retries - 1, delay * 2);
+            }
+            return "The wizard is currently resting. Please try again later.";
+        }
+    }
+
+    try {
+        await enableIndexedDbPersistence(db);
+        document.getElementById('offlineStatus').textContent = '⬡ Offline Mode Ready';
+    } catch (err) {
+        console.warn("Firestore persistence failed:", err.message);
+    }
+
+    let currentUserId = null;
+    let userDocRef = null;
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUserId = user.uid;
+            document.getElementById('userIdDisplay').textContent = `Registry ID: ${currentUserId.slice(0,12)}...`;
+
+            const profileCollectionPath = `artifacts/${appId}/users/${currentUserId}/profileData`;
+            userDocRef = doc(db, profileCollectionPath, "main");
+
+            const userDoc = await getDoc(userDocRef);
+            if (!userDoc.exists()) {
+                await setDoc(userDocRef, { gwaBalance: 1250, createdAt: serverTimestamp() });
+            }
+
+            onSnapshot(userDocRef, (doc) => {
+                document.getElementById('gwa-balance').textContent = doc.exists() ? (doc.data().gwaBalance || 0).toLocaleString() : 0;
+            });
+
+            const submissionsCollectionPath = `artifacts/${appId}/users/${currentUserId}/submissions`;
+            onSnapshot(collection(db, submissionsCollectionPath), (snapshot) => {
+                const logContainer = document.getElementById('submissionLog');
+                logContainer.innerHTML = '';
+                if (snapshot.empty) {
+                    logContainer.innerHTML = '<p class="log-empty">The ledger awaits its first inscription...</p>';
+                    return;
+                }
+                const submissions = snapshot.docs.map(doc => doc.data());
+                submissions.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                submissions.forEach(submission => {
+                    const isPending = submission.status === 'pending_review';
+                    const title = submission.type === 'commercial' ? submission.title : submission.task;
+                    const entry = document.createElement('div');
+                    entry.className = 'log-entry';
+                    entry.innerHTML = `
+                        <div class="log-entry-title">${title}</div>
+                        <div class="log-entry-meta">
+                            <span class="log-type">${submission.artType || submission.project}</span>
+                            <span class="${isPending ? 'log-status-pending' : 'log-status-approved'}">${submission.status.replace('_', ' ')}</span>
+                        </div>`;
+                    logContainer.appendChild(entry);
+                });
+            });
+
+            fetchDailyDirective();
+        } else {
+            signInAnonymously(auth).catch(console.error);
+        }
+    });
+
+    window.fetchDailyDirective = async function() {
+        const contentDiv = document.getElementById('directivesContent');
+        const button = document.getElementById('newDirectiveBtn');
+        button.disabled = true;
+        contentDiv.innerHTML = '<div class="directive-box"><div class="directive-label">Consulting the Oracle</div><div class="directive-text">The wizard stirs in the depths of the ether...</div></div>';
+
+        const prompt = "Generate a single, short, inspiring creative directive (2-3 sentences max) for a community of digital artists and creators. Be mystical and encouraging, like a wise wizard guiding their apprentices. Frame it as a 'Directive'.";
+        const directiveText = await callGemini(prompt);
+
+        contentDiv.innerHTML = `
+            <div class="directive-box">
+                <div class="directive-label">Today's Directive</div>
+                <div class="directive-text">${directiveText}</div>
+            </div>`;
+        button.disabled = false;
+    }
+
+    document.getElementById('ideaGeneratorForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const artType = document.getElementById('ideaArtType').value;
+        const theme = document.getElementById('ideaTheme').value;
+        const resultsDiv = document.getElementById('ideaResults');
+        const spinner = document.getElementById('ideaGenSpinner');
+        const btnText = document.getElementById('ideaGenBtnText');
+
+        spinner.classList.add('active');
+        btnText.textContent = "Conjuring...";
+        resultsDiv.textContent = 'The wizard consults the arcane scrolls...';
+
+        let themeClause = theme ? ` based on the theme: "${theme}"` : "";
+        const prompt = `You are a creative wizard. Generate 5 distinct and actionable project ideas for a digital artist creating a "${artType}"${themeClause}. Format them as a numbered list.`;
+
+        const ideas = await callGemini(prompt);
+        resultsDiv.textContent = ideas;
+        spinner.classList.remove('active');
+        btnText.textContent = "Conjure Ideas";
+    });
+
+    window.showModal = function(id) { document.getElementById(id).classList.add('open'); }
+    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
+
+    function showSuccessMessage(msg) {
+        document.getElementById('successMessage').textContent = msg;
+        showModal('successModal');
+    }
+
+    document.getElementById('commercialArtForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUserId) return;
+        const title = document.getElementById('artTitle').value;
+        const type = document.getElementById('artType').value;
+        try {
+            await addDoc(collection(db, `artifacts/${appId}/users/${currentUserId}/submissions`), {
+                userId: currentUserId, type: 'commercial', title, artType: type, status: 'pending_review', createdAt: serverTimestamp()
+            });
+            closeModal('commercialArtModal');
+            showSuccessMessage('Your art has been inscribed in the Grand Compendium.');
+            e.target.reset();
+        } catch (error) { console.error(error); }
+    });
+
+    document.getElementById('communityContributionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUserId) return;
+        const task = document.getElementById('contributionTask').value;
+        const project = document.getElementById('contributionProject').value;
+        try {
+            await addDoc(collection(db, `artifacts/${appId}/users/${currentUserId}/submissions`), {
+                userId: currentUserId, type: 'community', task, project, status: 'pending_review', createdAt: serverTimestamp()
+            });
+            closeModal('communityContributionModal');
+            showSuccessMessage('Your contribution has been recorded in the sacred ledger.');
+            e.target.reset();
+        } catch (error) { console.error(error); }
+    });
+
+    window.redeemGWA = async function() {
+        const amountInput = document.getElementById('redeemAmount');
+        const amount = parseInt(amountInput.value, 10);
+        if (!currentUserId || isNaN(amount) || amount <= 0) return;
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userDoc = await transaction.get(userDocRef);
+                if (!userDoc.exists()) throw "User document does not exist!";
+                const currentBalance = userDoc.data().gwaBalance || 0;
+                if (amount > currentBalance) throw "Insufficient GWA balance.";
+                transaction.update(userDocRef, { gwaBalance: currentBalance - amount });
+            });
+            amountInput.value = '';
+            showSuccessMessage(`${amount.toLocaleString()} GWA successfully transmuted to XRP.`);
+        } catch (e) {
+            showSuccessMessage(typeof e === 'string' ? e : 'The transmutation failed. Try again.');
+        }
+    }
+
+    // ===== COMMUNITY NOTICE BOARD =====
+    // Posts stored in a shared public collection visible to all users
+    const noticeBoardPath = `artifacts/${appId}/public/noticeBoard/posts`;
+
+    function timeAgo(timestamp) {
+        if (!timestamp) return 'just now';
+        const seconds = Math.floor((Date.now() / 1000) - timestamp.seconds);
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return `${Math.floor(seconds/60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds/3600)}h ago`;
+        return `${Math.floor(seconds/86400)}d ago`;
+    }
+
+    function renderReplies(replies, postId) {
+        const container = document.getElementById(`replies-${postId}`);
+        if (!container) return;
+        container.innerHTML = '';
+        if (replies && replies.length > 0) {
+            replies.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'reply-item';
+                const isGWA = r.author === 'Glass Wizard Australia';
+                div.innerHTML = `
+                    <div class="reply-author" style="${isGWA ? 'color:var(--gold-light);' : ''}">${isGWA ? '🧙 ' : ''}${r.author}</div>
+                    <div class="reply-text">${r.text}</div>`;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    function buildNoticeCard(postId, data) {
+        const urgency = data.urgency || 'medium';
+        const badgeClass = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' }[urgency];
+        const urgencyLabel = { high: 'Urgent', medium: 'Planning', low: 'Exploring' }[urgency];
+        const repliesArr = data.replies || [];
+        const replyCount = repliesArr.length;
+
+        const card = document.createElement('div');
+        card.className = `notice-post urgency-${urgency}`;
+        card.id = `post-${postId}`;
+        card.innerHTML = `
+            <div class="notice-post-header">
+                <div class="notice-town">📍 ${data.townName}</div>
+                <span class="notice-urgency-badge ${badgeClass}">${urgencyLabel}</span>
+            </div>
+            <div class="notice-author">From ${data.yourName} · ${data.contact}</div>
+            <div class="notice-message">${data.message}</div>
+            <div class="notice-meta">
+                <span class="notice-timestamp">${timeAgo(data.createdAt)}</span>
+                <button class="notice-reply-btn" onclick="toggleReplies('${postId}')">
+                    💬 ${replyCount > 0 ? `${replyCount} reply${replyCount > 1 ? 's' : ''}` : 'Reply'}
+                </button>
+            </div>
+            <div id="replies-${postId}" class="notice-replies">
+                <!-- replies inserted here -->
+                <div class="reply-form">
+                    <input type="text" class="reply-input" id="replyInput-${postId}" placeholder="Write a reply..." />
+                    <button class="reply-submit" onclick="submitReply('${postId}')">Send</button>
+                </div>
+            </div>`;
+        renderReplies(repliesArr, postId);
+        return card;
+    }
+
+    // Live listener for notice board posts
+    onSnapshot(collection(db, noticeBoardPath), (snapshot) => {
+        const grid = document.getElementById('noticeBoardGrid');
+        grid.innerHTML = '';
+
+        if (snapshot.empty) {
+            grid.innerHTML = `<div class="notice-empty"><div class="notice-empty-icon">📜</div><p>No community invitations yet. Be the first to reach out.</p></div>`;
+            return;
+        }
+
+        const posts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        posts.sort((a, b) => {
+            // Sort: high urgency first, then by recency
+            const urgencyOrder = { high: 0, medium: 1, low: 2 };
+            if (urgencyOrder[a.urgency] !== urgencyOrder[b.urgency]) return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+            return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+        });
+
+        posts.forEach(post => {
+            grid.appendChild(buildNoticeCard(post.id, post));
+        });
+    });
+
+    window.toggleReplies = function(postId) {
+        const container = document.getElementById(`replies-${postId}`);
+        container.classList.toggle('open');
+        // Focus reply input when opening
+        if (container.classList.contains('open')) {
+            document.getElementById(`replyInput-${postId}`)?.focus();
+        }
+    }
+
+    window.submitReply = async function(postId) {
+        const input = document.getElementById(`replyInput-${postId}`);
+        const text = input.value.trim();
+        if (!text || !currentUserId) return;
+
+        // Determine author name — if it's Shannon/Sam, label as GWA
+        const isAdmin = false; // Set to true for admin accounts if needed
+        const authorLabel = isAdmin ? 'Glass Wizard Australia' : `Community Member`;
+
+        try {
+            const postRef = doc(db, noticeBoardPath, postId);
+            const postSnap = await getDoc(postRef);
+            if (!postSnap.exists()) return;
+            const existing = postSnap.data().replies || [];
+            existing.push({ author: authorLabel, text, timestamp: Date.now() });
+            await setDoc(postRef, { replies: existing }, { merge: true });
+            input.value = '';
+        } catch (e) {
+            console.error('Reply failed:', e);
+        }
+    }
+
+    document.getElementById('noticeBoardForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUserId) return;
+
+        const townName = document.getElementById('nbTownName').value.trim();
+        const yourName = document.getElementById('nbYourName').value.trim();
+        const contact = document.getElementById('nbContact').value.trim();
+        const urgency = document.getElementById('nbUrgency').value;
+        const message = document.getElementById('nbMessage').value.trim();
+
+        try {
+            await addDoc(collection(db, noticeBoardPath), {
+                townName, yourName, contact, urgency, message,
+                createdAt: serverTimestamp(),
+                replies: [],
+                userId: currentUserId
+            });
+            closeModal('noticeBoardModal');
+            showSuccessMessage(`Your invitation from ${townName} has been posted to the notice board. We'll be in touch soon.`);
